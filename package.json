@@ -1,0 +1,16 @@
+{
+  "name": "facharbeit-2022",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jean-Michel | Mujaca#2202",
+  "license": "ISC",
+  "dependencies": {
+    "anilist-node": "^1.11.0",
+    "fs": "^0.0.1-security",
+    "keyword-extractor": "^0.0.21"
+  }
+}
