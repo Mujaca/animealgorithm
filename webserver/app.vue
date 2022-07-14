@@ -14,7 +14,7 @@
     <div class="recomandations">
       <div class="anime_recommandation" v-for="(show,index) in recomandations" :key="index" >
         <img class="anime_picture" :alt="show.title.romaji" :src="show['coverImage'].medium"/>
-        <div class="anime_title"> {{show.title.romaji}} </div>
+        <div class="anime_title" :anilist="'https://anilist.co/anime/' + show.id" @click="test"> {{show.title.romaji}} </div>
         <div class="anime_description"> <div class="anime_description_text" v-html="show.description"/> </div>
         <div class="anime_placement"> #{{(index + 1) + (recomandations.length * (page))}} </div>
       </div>
@@ -29,6 +29,10 @@ var username = ref("");
 var recomandations = ref([])
 var loading = ref(false);
 var page = ref(0)
+
+async function test(event){
+  window.open(event.target.getAttribute('anilist'), '_blank').focus();
+}
 
 async function addPage(){
   page.value++;
