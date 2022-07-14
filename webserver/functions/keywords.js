@@ -14,7 +14,7 @@ function getKeyWords(text){
 
     extraction_result.forEach((result, index) => {
         var number = keywords[result]
-        if(result != "source" && number > 5) real.push({number, keyword: result})
+        if(result != "source" && number > 10) real.push({number, keyword: result})
         
     })
 
@@ -29,7 +29,7 @@ function generateKeyWordsByDescription(animes){
     var animes_already_done = []
     Object.keys(animes).forEach((key, index) => {
         Object.keys(animes[key]).forEach((anime, i) => {
-            if(!animes_already_done.includes(animes[key][anime].title.romaji)) {
+            if(animes[key][anime] instanceof Object && animes[key][anime].title instanceof Object && !animes_already_done.includes(animes[key][anime].title.romaji)) {
                 animes_already_done.push(animes[key][anime].title.romaji);
                 const extraction_result = keyword_extractor.extract(animes[key][anime].description,{
                     language:"english",
