@@ -1,10 +1,7 @@
 import * as fs from "fs";
-import * as recoms from "../../../functions/getRecommandations.js"
-import * as anilist from "../../../functions/anilist.js";
-import * as keywords from "../../../functions/keywords.js";
+import * as recoms from "../../functions/getRecommandations.js"
+import * as anilist from "../../functions/anilist.js";
 import * as config from "../../../config.json";
-
-keywords.generateKeyWordsByDescription();
 
 var personalList = {}
 var generated = {}

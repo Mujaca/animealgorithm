@@ -8,5 +8,9 @@
   },
   "devDependencies": {
     "nuxt": "3.0.0-rc.4"
+  },
+  "dependencies": {
+    "anilist-node": "^1.12.1",
+    "keyword-extractor": "^0.0.23"
   }
 }
