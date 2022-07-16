@@ -1,4 +1,4 @@
-const config = require('../../config.json')
+const config = require('../config.json')
 const anilist = require('anilist-node');
 const Anilist = new anilist(config.token);
 
