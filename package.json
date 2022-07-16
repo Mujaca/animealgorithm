@@ -1,16 +1,16 @@
 {
-  "name": "facharbeit-2022",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
   },
-  "author": "Jean-Michel | Mujaca#2202",
-  "license": "ISC",
+  "devDependencies": {
+    "nuxt": "3.0.0-rc.4"
+  },
   "dependencies": {
-    "anilist-node": "^1.11.0",
-    "fs": "^0.0.1-security",
-    "keyword-extractor": "^0.0.21"
+    "anilist-node": "^1.12.1",
+    "keyword-extractor": "^0.0.23"
   }
 }

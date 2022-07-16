@@ -1,7 +1,7 @@
 const { getAllSeasonAnimes } = require('./anilist');
 const { getBestShows } = require('./getBest');
-var {getKeyWords} = require('./keywords');
-const fs = require('fs')
+var { getKeyWords, generateKeyWordsByDescription } = require('./keywords');
+var animes = []
 var seasons = [
     "WINTER",
     "SPRING",
@@ -9,31 +9,11 @@ var seasons = [
     "FALL"
 ]
 
+fetchAnimes();
+
 async function getRecommandations(userlists, allusers){
     return new Promise(async (resolve, reject) => {
-        //console.log("started")
         var year = new Date().getFullYear() - 1;
-        var animes = [];
-
-        if(!fs.existsSync('../data/animes.json')) {
-            for (let index = 0; index < 11; index++) {
-                for (let i = 0; i < seasons.length; i++) {
-                    const season = seasons[i];
-                    var season_animes = await getAllSeasonAnimes(year, season);
-                    console.log(season_animes.length, animes.length)
-                    season_animes.forEach((anime) => {
-                        if(!includesAnime(animes, anime)) animes.push(anime);
-                    })
-                }
-                year--;
-            }
-        }else{
-            animes = JSON.parse(fs.readFileSync('../data/animes.json'))
-        }
-
-        fs.writeFileSync('../data/animes.json', JSON.stringify(animes));
-
-        //console.log(animes.length)
 
         Object.keys(allusers).forEach((user) => {
             var best = getBestShows(allusers[user]);
@@ -42,8 +22,6 @@ async function getRecommandations(userlists, allusers){
             })
         })
 
-        //console.log(animes.length)
-
         Object.values(userlists).forEach((anime) => {
             if(includesAnime(animes, anime)) {
                 animes.forEach((singleAnime, index) => {
@@ -51,8 +29,6 @@ async function getRecommandations(userlists, allusers){
                 })
             }
         })
-
-        //console.log(animes.length)
 
         var best = getBestShows(userlists);
         var recomandations = []
@@ -71,7 +47,6 @@ async function getRecommandations(userlists, allusers){
             return b.recomandation - a.recomandation;
         });
 
-        //fs.writeFileSync('./recomandations.json', JSON.stringify(recomandations))
         resolve(recomandations);
     })
 }
@@ -84,6 +59,23 @@ function includesAnime(array, show) {
         if(arrobj instanceof Object && arrobj.title instanceof Object && arrobj.title.romaji == show.title.romaji) bool = true;
     })
     return bool;
+}
+
+async function fetchAnimes(){
+    var year = new Date().getFullYear() - 1;
+    for (let index = 0; index < 11; index++) {
+        for (let i = 0; i < seasons.length; i++) {
+            const season = seasons[i];
+            var season_animes = await getAllSeasonAnimes(year, season);
+            console.log(season_animes.length, animes.length)
+            season_animes.forEach((anime) => {
+                if(!includesAnime(animes, anime)) animes.push(anime);
+            })
+        }
+        year--;
+    }
+    console.log("a")
+    generateKeyWordsByDescription(animes)
 }
 
 function calcuteSimilarities(show1, show2){
