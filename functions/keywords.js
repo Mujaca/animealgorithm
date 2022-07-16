@@ -1,5 +1,6 @@
 const keyword_extractor = require("keyword-extractor");
 var keywords = {}
+var min_keywordcount = 30
 
 
 function getKeyWords(text){
@@ -50,9 +51,15 @@ function generateKeyWordsByDescription(animes){
     console.log("done")
 }
 
+function setMinKeywordCount(number) {
+    min_keywordcount = number;
+}
+
 module.exports = {
     getKeyWords,
     generateKeyWordsByDescription,
+    setMinKeywordCount,
 }
 exports.getKeyWords = getKeyWords;
 exports.generateKeyWordsByDescription = generateKeyWordsByDescription;
+exports.setMinKeywordCount = setMinKeywordCount;
