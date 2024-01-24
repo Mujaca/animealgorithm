@@ -7,10 +7,10 @@
     "preview": "nuxt preview"
   },
   "devDependencies": {
-    "nuxt": "3.0.0-rc.4"
+    "nuxt": "^3.9.3"
   },
   "dependencies": {
-    "anilist-node": "^1.12.1",
+    "anilist-node": "^1.14.0",
     "keyword-extractor": "^0.0.23"
   }
 }

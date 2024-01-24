@@ -1,7 +1,7 @@
 import * as fs from "fs";
-import * as recoms from "../../functions/getRecommandations.js"
-import * as anilist from "../../functions/anilist.js";
-import * as keywords from "../../functions/keywords.js";
+import * as recoms from "../../functions/getRecommandations"
+import * as anilist from "../../functions/anilist";
+import * as keywords from "../../functions/keywords";
 import * as config from "../../config.json";
 
 var personalList = {}
@@ -13,7 +13,7 @@ config.group.forEach(async (user) => {
 
 export default defineEventHandler(async (event) => {
   // Get the Querys / set the default values for them
-  const query = useQuery(event)
+  const query = getQuery(event)
   var limit = query.limit ? query.limit : 100
   var page = query.page ? query.page : 0
   var keyword = query.keywords ? query.keywords : 30
