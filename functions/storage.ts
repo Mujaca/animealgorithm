@@ -37,9 +37,11 @@ function readCache(){
     });
 
     for(let file of files) {
-        const fileString = fs.readFileSync(`./storage/${file}.json`, 'utf-8');
+        const fileString = fs.readFileSync(`./storage/${file}`, 'utf-8');
         const fileObject = JSON.parse(fileString) as AnimeEntry;
-        const id = parseInt(file as string);
+
+        const fileIdString = file as string
+        const id = parseInt(fileIdString.replaceAll('.json', ''));
 
         animeStorage.set(id, fileObject);
     }

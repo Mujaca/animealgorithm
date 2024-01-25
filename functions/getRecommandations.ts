@@ -31,9 +31,9 @@ export async function getRecommandations(userlists: personalList, allusers: allU
                 if (singleAnime.title.romaji == anime.media.title.romaji) {
                     animes.splice(index, 1);
 
-                    for (let anilistRecomandation of singleAnime.recommendations) {
+                    /**for (let anilistRecomandation of singleAnime.recommendations) {
                         if (!anilistRecomandations.includes(anilistRecomandation.id)) anilistRecomandations.push(anilistRecomandation.id)
-                    }
+                    }**/
                 }
 
             }
@@ -80,6 +80,8 @@ async function fetchAnimes() {
         for (let i = 0; i < seasons.length; i++) {
             const season = seasons[i] as MediaSeason;
             const season_animes = await getAllSeasonAnimes(year, season);
+
+            console.log(`Fetching ${season} ${year}`)
 
             for (let anime of season_animes) {
                 if (!includesAnime(animes, anime)) animes.push(anime);

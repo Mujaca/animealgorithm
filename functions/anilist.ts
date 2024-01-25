@@ -8,6 +8,7 @@ const anilist = new Anilist(config.token);
 export async function getAllSeasonAnimes(year: number, season: MediaSeason, page?: number): Promise<AnimeEntry[]> {
     if (!page) page = 1;
     let animes: AnimeEntry[] = [];
+    await sleep(3000);
     const data = await anilist.searchEntry.anime(undefined, {
         format: "TV",
         season: season,
@@ -34,7 +35,8 @@ export async function getAnimeByID(animeid: number) {
 }
 
 export async function updatePersonalList(username: string): Promise<personalList> {
-    var personalList:personalList = {};
+    const personalList:personalList = {};
+    await sleep(4000)
     const listData = await anilist.lists.anime(username)
     listData[0].entries[0].media
     for (let singleList of listData) {
