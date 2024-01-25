@@ -2,6 +2,7 @@ import type { personalList } from '~/@types/anilist';
 import config from '../config.json';
 import { type MediaSearchEntry, type MediaFilterTypes, type MediaSeason, type AnimeEntry, type ListEntry } from 'anilist-node';
 import Anilist from 'anilist-node';
+import { addToCache, getFromCache, isInCache } from './storage';
 const anilist = new Anilist(config.token);
 
 export async function getAllSeasonAnimes(year: number, season: MediaSeason, page?: number): Promise<AnimeEntry[]> {
@@ -25,9 +26,10 @@ export async function getAllSeasonAnimes(year: number, season: MediaSeason, page
 }
 
 export async function getAnimeByID(animeid: number) {
-    console.log(animeid)
-    await sleep(900);
-    const anime = await anilist.media.anime(animeid)
+    if(isInCache(animeid)) return getFromCache(animeid) as AnimeEntry; 
+    await sleep(1500);
+    const anime = await anilist.media.anime(animeid);
+    addToCache(anime.id, anime);
     return anime;
 }
 

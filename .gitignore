@@ -7,3 +7,5 @@ config.json
 .output
 .env
 dist
+
+storage/
