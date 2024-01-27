@@ -7,6 +7,7 @@ const anilist = new Anilist(config.token);
 
 export async function getAllSeasonAnimes(year: number, season: MediaSeason, page?: number): Promise<AnimeEntry[]> {
     if (!page) page = 1;
+    console.log(`Fetching page ${page} from ${season} ${year}`)
     let animes: AnimeEntry[] = [];
     await sleep(3000);
     const data = await anilist.searchEntry.anime(undefined, {
@@ -14,6 +15,8 @@ export async function getAllSeasonAnimes(year: number, season: MediaSeason, page
         season: season,
         seasonYear: year
     }, page, 25)
+    if(data.media.length as number == 0) return []
+    console.log(`Got ${data.media.length} from page ${page} from ${season} ${year}`)
 
     for (let media of data.media) {
         const anime = await getAnimeByID(media.id)
@@ -28,7 +31,8 @@ export async function getAllSeasonAnimes(year: number, season: MediaSeason, page
 
 export async function getAnimeByID(animeid: number) {
     if(isInCache(animeid)) return getFromCache(animeid) as AnimeEntry; 
-    await sleep(1500);
+    console.log(`${animeid} is not in the cache. Fetching from anilist`)
+    await sleep(3000);
     const anime = await anilist.media.anime(animeid);
     addToCache(anime.id, anime);
     return anime;

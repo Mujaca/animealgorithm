@@ -36,6 +36,8 @@ function readCache(){
         'withFileTypes': false
     });
 
+    console.log(`Loaded ${files.length} from cache`)
+
     for(let file of files) {
         const fileString = fs.readFileSync(`./storage/${file}`, 'utf-8');
         const fileObject = JSON.parse(fileString) as AnimeEntry;

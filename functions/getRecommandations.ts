@@ -12,10 +12,9 @@ var seasons = [
     "FALL"
 ]
 
-fetchAnimes();
-
 export async function getRecommandations(userlists: personalList, allusers: allUser) {
     const anilistRecomandations: number[] = [];
+    let animesArr = animes.slice()
 
     for (let user of Object.keys(allusers)) {
         const best = getBestShows(allusers[user]);
@@ -25,11 +24,11 @@ export async function getRecommandations(userlists: personalList, allusers: allU
     }
 
     for (let anime of Object.values(userlists)) {
-        if (includesAnime(animes, anime.media as AnimeEntry)) {
-            for (let index = 0; index < animes.length; index++) {
-                const singleAnime = animes[index];
+        if (includesAnime(animesArr, anime.media as AnimeEntry)) {
+            for (let index = 0; index < animesArr.length; index++) {
+                const singleAnime = animesArr[index];
                 if (singleAnime.title.romaji == anime.media.title.romaji) {
-                    animes.splice(index, 1);
+                    animesArr.splice(index, 1);
 
                     /**for (let anilistRecomandation of singleAnime.recommendations) {
                         if (!anilistRecomandations.includes(anilistRecomandation.id)) anilistRecomandations.push(anilistRecomandation.id)
@@ -43,26 +42,26 @@ export async function getRecommandations(userlists: personalList, allusers: allU
     const best = getBestShows(userlists);
     const recomandations: AnimeEntry[] = []
 
-    for (let anime of animes) {
+    for (let anime of animesArr) {
         let sum = 0;
 
         for (let topAnime of best) {
             let add = (calcuteSimilarities(anime, topAnime.media as AnimeEntry) * topAnime.score);
-            if (anilistRecomandations.includes(anime.id)) add = add * 1.1;
+            //if (anilistRecomandations.includes(anime.id)) add = add * 1.1;
             sum = + add
 
             // @ts-ignore
-            anime['recomandation'] = sum / best.length
-            recomandations.push(anime)
+            topAnime.media['recomandation'] = sum / best.length
+            recomandations.push(topAnime.media as AnimeEntry)
         }
-
-        recomandations.sort(function (a, b) {
-            //@ts-ignore
-            return b.recomandation - a.recomandation;
-        });
-
-        return recomandations;
+        console.log("r: ", recomandations.length)
     }
+    recomandations.sort(function (a, b) {
+        //@ts-ignore
+        return b.recomandation - a.recomandation;
+    });
+
+    return recomandations;
 }
 
 function includesAnime(array: AnimeEntry[], show: AnimeEntry) {
@@ -74,14 +73,14 @@ function includesAnime(array: AnimeEntry[], show: AnimeEntry) {
     return bool;
 }
 
-async function fetchAnimes() {
+export async function fetchAnimes() {
     let year = new Date().getFullYear() - 1;
     for (let index = 0; index < 11; index++) {
         for (let i = 0; i < seasons.length; i++) {
             const season = seasons[i] as MediaSeason;
+            console.log(`Fetching ${season} ${year}`)
             const season_animes = await getAllSeasonAnimes(year, season);
 
-            console.log(`Fetching ${season} ${year}`)
 
             for (let anime of season_animes) {
                 if (!includesAnime(animes, anime)) animes.push(anime);
@@ -90,7 +89,9 @@ async function fetchAnimes() {
         }
         year--;
     }
-    generateKeyWordsByDescription(animes)
+    generateKeyWordsByDescription(animes);
+    console.log("Done fetching animes")
+    return true;
 }
 
 export function calcuteSimilarities(show1: AnimeEntry, show2: AnimeEntry) {
