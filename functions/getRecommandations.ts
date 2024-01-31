@@ -44,17 +44,16 @@ export async function getRecommandations(userlists: personalList, allusers: allU
 
     for (let anime of animesArr) {
         let sum = 0;
-
         for (let topAnime of best) {
+
             let add = (calcuteSimilarities(anime, topAnime.media as AnimeEntry) * topAnime.score);
             //if (anilistRecomandations.includes(anime.id)) add = add * 1.1;
             sum = + add
 
-            // @ts-ignore
-            topAnime.media['recomandation'] = sum / best.length
-            recomandations.push(topAnime.media as AnimeEntry)
         }
-        console.log("r: ", recomandations.length)
+        // @ts-ignore
+        anime['recomandation'] = sum / best.length
+        recomandations.push(anime)
     }
     recomandations.sort(function (a, b) {
         //@ts-ignore
@@ -66,11 +65,10 @@ export async function getRecommandations(userlists: personalList, allusers: allU
 
 function includesAnime(array: AnimeEntry[], show: AnimeEntry) {
     if (show.title == undefined) return false;
-    var bool = false;
-    array.forEach((arrobj) => {
-        if (arrobj instanceof Object && arrobj.title instanceof Object && arrobj.title.romaji == show.title.romaji) bool = true;
-    })
-    return bool;
+    for(let entry of array) {
+        if((entry.id == show.id) || entry.title.english === show.title.english) return true;
+    }
+    return false;
 }
 
 export async function fetchAnimes() {
