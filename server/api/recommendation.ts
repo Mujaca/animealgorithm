@@ -40,10 +40,10 @@ export default defineEventHandler(async (event) => {
     for (let index = 0; index < userreoms.length; index++) {
         const anime = userreoms[index];
         
-        /**if (!anime.coverImage) {
+        if (!anime.coverImage) {
             userreoms.splice(index, 1);
             index--;
-        }**/
+        }
     }
 
     generated[username] = userreoms
