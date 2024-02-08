@@ -58,9 +58,14 @@ export async function updatePersonalList(username: string): Promise<personalList
     return personalList;
 }
 
+export async function getGenres(){
+    return await anilist.genres()
+}
+
 export function getListStatus(username:string, anime:string) {
     return listType.get(username)?.get(anime)
 }
+
 
 function sleep(ms: number) {
     return new Promise((resolve) => {

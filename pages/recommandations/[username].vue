@@ -21,6 +21,9 @@
                 in 3-5 buisness days
             </div>
         </div>
+        <div class="genres-container">
+            <div class="genre-chip" v-for="genre in genres" @click="genreChipClick"> {{ genre }}</div>
+        </div>
         <div>
             <div class="anime-container" v-for="(animeArray, i) in fetchedAnimes">
                 <span class="anime-loader"></span>
@@ -42,6 +45,7 @@ const page = ref(0)
 const fetchedAnimes: Ref<any[]> = ref([]);
 
 const { data: animes, refresh } = await useFetch(() => `/api/recommendation?user=${username}&limit=20&page=${page.value}`);
+const { data:genres } = await useFetch('/api/genres');
 refreshNuxtData();
 fetchedAnimes.value.push(animes.value)
 
@@ -78,6 +82,10 @@ function onScroll(event: Event) {
         span.remove();
         loadMoreAnime();
     }
+}
+
+function genreChipClick(event:MouseEvent) {
+    console.log(event)
 }
 
 useHead({
@@ -189,6 +197,31 @@ nav {
     }
 
 
+}
+
+.genres-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 4px;
+    gap: 1rem;
+
+    .genre-chip {
+        background-color: #006666;
+        border: 1px solid #006666;
+        padding: 8px 10px;
+        border-radius: 64px;
+        user-select: none;
+
+        &:hover {
+            border: 1px solid white;
+        }
+
+        &.active {
+            border: 1px solid white;
+        }
+
+    }
 }
 
 .anime-container {
