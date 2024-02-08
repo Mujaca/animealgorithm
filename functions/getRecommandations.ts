@@ -1,9 +1,11 @@
-import type { AnimeEntry, MediaSeason } from "anilist-node";
+import type { AnimeEntry, ListEntry, MediaSeason } from "anilist-node";
 import type { allUser, personalList } from "~/@types/anilist";
 import { getAllSeasonAnimes } from "./anilist";
 import { getBestShows } from "./getBest";
-import { getKeyWords, generateKeyWordsByDescription } from "./keywords";
-
+import { getKeyWords, generateKeyWordsByDescription, getMinKeywordCount, getKeyWordObj } from "./keywords";
+import { Worker } from 'worker_threads';
+import { threads } from '../config.json';
+ 
 var animes: AnimeEntry[] = []
 var seasons = [
     "WINTER",
@@ -29,10 +31,6 @@ export async function getRecommandations(userlists: personalList, allusers: allU
                 const singleAnime = animesArr[index];
                 if (singleAnime.title.romaji == anime.media.title.romaji) {
                     animesArr.splice(index, 1);
-
-                    /**for (let anilistRecomandation of singleAnime.recommendations) {
-                        if (!anilistRecomandations.includes(anilistRecomandation.id)) anilistRecomandations.push(anilistRecomandation.id)
-                    }**/
                 }
 
             }
@@ -40,21 +38,7 @@ export async function getRecommandations(userlists: personalList, allusers: allU
     }
 
     const best = getBestShows(userlists);
-    const recomandations: AnimeEntry[] = []
-
-    for (let anime of animesArr) {
-        let sum = 0;
-        for (let topAnime of best) {
-
-            let add = (calcuteSimilarities(anime, topAnime.media as AnimeEntry) * topAnime.score);
-            //if (anilistRecomandations.includes(anime.id)) add = add * 1.1;
-            sum = + add
-
-        }
-        // @ts-ignore
-        anime['recomandation'] = sum / best.length
-        recomandations.push(anime)
-    }
+    const recomandations: AnimeEntry[] = await calculateService(animesArr, best);
     recomandations.sort(function (a, b) {
         //@ts-ignore
         return b.recomandation - a.recomandation;
@@ -65,8 +49,8 @@ export async function getRecommandations(userlists: personalList, allusers: allU
 
 function includesAnime(array: AnimeEntry[], show: AnimeEntry) {
     if (show.title == undefined) return false;
-    for(let entry of array) {
-        if((entry.id == show.id) || entry.title.english === show.title.english) return true;
+    for (let entry of array) {
+        if ((entry.id == show.id) || entry.title.english === show.title.english) return true;
     }
     return false;
 }
@@ -135,4 +119,47 @@ export function calcuteSimilarities(show1: AnimeEntry, show2: AnimeEntry) {
     }
 
     return score / counted
+}
+
+function createChunks(animes: AnimeEntry[], chunks: number) {
+    const slicedChunks = []
+    const chunkSize = animes.length / chunks;
+
+
+    for (let i = 0; i < animes.length; i += chunkSize)
+        slicedChunks.push(animes.slice(i, i + chunkSize));
+
+    return slicedChunks;
+}
+
+async function startWorker(animes:AnimeEntry[], bestAnimes:ListEntry[]):Promise<AnimeEntry[]> {
+    return new Promise((resolve) => {
+        const thread = new Worker('./worker/calculation.js', {
+            workerData: {
+                animes,
+                best: bestAnimes,
+                keywords: {
+                    keywords: getKeyWordObj(),
+                    minCount: getMinKeywordCount()
+                }
+            },
+        });
+        thread.once('message', resolve)
+    })
+}
+
+async function calculateService(animes: AnimeEntry[], bestAnimes:ListEntry[]) {
+    const chunks = createChunks(animes, threads);
+    const promisses = [];
+    for(let chunk of chunks) {
+        promisses.push(startWorker(chunk, bestAnimes));
+    }
+
+    const recomandation = [];
+    const arrays = await Promise.all(promisses)
+    for(let data of arrays) {
+        recomandation.push(...data);
+    }
+
+    return recomandation;
 }

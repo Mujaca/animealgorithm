@@ -52,3 +52,11 @@ export function generateKeyWordsByDescription(animes: AnimeEntry[]) {
 export function setMinKeywordCount(number: number): void {
     min_keywordcount = number;
 }
+
+export function getMinKeywordCount() {
+    return min_keywordcount;
+}
+
+export function getKeyWordObj(){
+    return keywords;
+}
