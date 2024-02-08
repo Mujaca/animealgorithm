@@ -22,7 +22,7 @@
             </div>
         </div>
         <div class="genres-container">
-            <div class="genre-chip" v-for="genre in genres" @click="genreChipClick"> {{ genre }}</div>
+            <div class="genre-chip" v-for="genre in genres" @click="genreChipClick($event, genre)"> {{ genre }}</div>
         </div>
         <div>
             <div class="anime-container" v-for="(animeArray, i) in fetchedAnimes">
@@ -44,8 +44,10 @@ const username = route.params.username
 const page = ref(0)
 const fetchedAnimes: Ref<any[]> = ref([]);
 
-const { data: animes, refresh } = await useFetch(() => `/api/recommendation?user=${username}&limit=20&page=${page.value}`);
-const { data:genres } = await useFetch('/api/genres');
+const selectedGenres:Ref<string[]> = ref([]);
+
+const { data: animes, refresh } = await useFetch(() => `/api/recommendation?user=${username}&limit=20&page=${page.value}${selectedGenres.value.length > 0 ? '&include_genres=' + selectedGenres.value.join(';') : ''}`);
+const { data:genres } = await useFetch<string[]>('/api/genres');
 refreshNuxtData();
 fetchedAnimes.value.push(animes.value)
 
@@ -84,8 +86,24 @@ function onScroll(event: Event) {
     }
 }
 
-function genreChipClick(event:MouseEvent) {
-    console.log(event)
+async function genreChipClick(event:MouseEvent, genre:string) {
+    const isInArray = selectedGenres.value.includes(genre);
+    const target = event.target as HTMLDivElement
+
+    if(!isInArray) {
+        selectedGenres.value.push(genre);
+        target.classList.add('active');
+    }else {
+        selectedGenres.value.splice(selectedGenres.value.indexOf(genre), 1);
+        target.classList.remove('active')
+    }
+
+    fetchedAnimes.value = [];
+    page.value = 0;
+    nextTick(async () => {
+        await refresh();
+        fetchedAnimes.value.push(animes.value)
+    })
 }
 
 useHead({
@@ -202,7 +220,8 @@ nav {
 .genres-container {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
     padding: 4px;
     gap: 1rem;
 
@@ -215,6 +234,7 @@ nav {
 
         &:hover {
             border: 1px solid white;
+            cursor: pointer;
         }
 
         &.active {
