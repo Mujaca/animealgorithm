@@ -3,5 +3,6 @@
     "group": [
         "Mujaca"
     ],
+    "yearsToFetch": 10,
     "threads": 2
 }

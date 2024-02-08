@@ -1,9 +1,11 @@
 import type { personalList } from '~/@types/anilist';
 import config from '../config.json';
-import { type MediaSearchEntry, type MediaFilterTypes, type MediaSeason, type AnimeEntry, type ListEntry } from 'anilist-node';
+import { type MediaSearchEntry, type MediaFilterTypes, type MediaSeason, type AnimeEntry, type ListEntry, type UserStaffNameLanguage } from 'anilist-node';
 import Anilist from 'anilist-node';
 import { addToCache, getFromCache, isInCache } from './storage';
 const anilist = new Anilist(config.token);
+
+const listType:Map<string, Map<string, string>> = new Map();
 
 export async function getAllSeasonAnimes(year: number, season: MediaSeason, page?: number): Promise<AnimeEntry[]> {
     if (!page) page = 1;
@@ -40,19 +42,24 @@ export async function getAnimeByID(animeid: number) {
 
 export async function updatePersonalList(username: string): Promise<personalList> {
     const personalList:personalList = {};
+    listType.set(username, new Map());
     await sleep(4000)
     const listData = await anilist.lists.anime(username)
-    listData[0].entries[0].media
-    for (let singleList of listData) {
-        if (singleList.status == "PLANNING") continue;
 
+    for (let singleList of listData) {
+        
         for(let entrie of singleList.entries) {
-            const mediaentrie = entrie;
-            personalList[entrie.media.title.romaji] = mediaentrie
+            listType.get(username)?.set(entrie.media.title.romaji, singleList.status)
+            if (singleList.status == "PLANNING" || singleList.status == "DROPPED") continue;
+            personalList[entrie.media.title.romaji] = entrie
         }
     }
 
     return personalList;
+}
+
+export function getListStatus(username:string, anime:string) {
+    return listType.get(username)?.get(anime)
 }
 
 function sleep(ms: number) {

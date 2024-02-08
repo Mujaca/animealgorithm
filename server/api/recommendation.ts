@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
     }
 
     let userreoms = generated[username]
-    if (generated[username] == undefined || (query.regenerate == true || query.regenerate == 1)) userreoms = await getRecommandations(personalList[username], personalList)
+    if (generated[username] == undefined || (query.regenerate == true || query.regenerate == 1)) userreoms = await getRecommandations(personalList[username], personalList,username)
 
     for (let index = 0; index < userreoms.length; index++) {
         const anime = userreoms[index];

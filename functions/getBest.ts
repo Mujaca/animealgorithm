@@ -4,13 +4,15 @@ import { getKeyWords } from "./keywords";
 
 export function getBestShows(userlist:personalList):ListEntry[] {
     let arr:ListEntry[] = [];
-    const keys = Object.keys(userlist)
+    
     for(let animekey of Object.keys(userlist)) {
         arr.push(userlist[animekey])
     }
+
     arr.sort(function(a, b) {
         return b.score - a.score;
     });
+    
     let length = arr.length - 1;
     arr.splice((length / 100) * 35, length - ((length / 100) * 35) + 1);
     return arr

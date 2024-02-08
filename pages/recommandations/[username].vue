@@ -3,11 +3,29 @@
         <nav>
             <button class="home-button" @click="goBack"> <span class="material-icons"> home </span> </button>
             <input :value="username" class="username-input" readonly placeholder="Anilist Username">
+            <button class="home-button" @click="showSettings = !showSettings"> <span class="material-icons"> settings
+                </span> </button>
         </nav>
+        <div class="settings-underlay" v-if="showSettings" @click="showSettings = false"></div>
+        <div class="settings-container" v-if="showSettings">
+            <div class="header">
+                <button class="close-button" @click="showSettings = false"><span class="material-icons"> close</span></button>
+                <p> Einstellungen </p>
+                <button class="close-button" @click="showSettings = false"><span class="material-icons"> refresh </span></button>
+            </div>
+
+            <div class="settings-area">
+                Coming soon ... <br>
+                maybe ... <br>
+                some day ... <br>
+                in 3-5 buisness days
+            </div>
+        </div>
         <div>
             <div class="anime-container" v-for="(animeArray, i) in fetchedAnimes">
                 <span class="anime-loader"></span>
-                <Anime class="anime-component" v-for="(anime, index) in animeArray" :show="anime" :index="(index + 1) + (animeArray.length * (i))" />
+                <Anime class="anime-component" v-for="(anime, index) in animeArray" :show="anime"
+                    :index="(index + 1) + (animeArray.length * (i))" />
             </div>
         </div>
     </div>
@@ -16,6 +34,9 @@
 <script setup lang="ts">
 const route = useRoute()
 const router = useRouter()
+
+const showSettings = ref(false);
+
 const username = route.params.username
 const page = ref(0)
 const fetchedAnimes: Ref<any[]> = ref([]);
@@ -47,17 +68,21 @@ function checkVisible(elm: HTMLElement, threshold: number = 0, mode: string = 'v
     return mode === 'above' ? above : (mode === 'below' ? below : !above && !below);
 }
 
-function onScroll(event:Event) {
+function onScroll(event: Event) {
     const spans = document.querySelectorAll('.anime-loader');
     const span = spans[spans.length - 1] as HTMLElement;
-    if(!span) return;
-    
+    if (!span) return;
+
     const isVisible = checkVisible(span, 15);
-    if(isVisible) {
+    if (isVisible) {
         span.remove();
         loadMoreAnime();
-    } 
+    }
 }
+
+useHead({
+    title: `${username}'s Anime recommandations'` 
+})
 
 onMounted(() => {
     document.addEventListener('scroll', onScroll);
@@ -70,24 +95,13 @@ onBeforeMount(() => {
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 nav {
-    position: relative;
     display: flex;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    margin-top: 8px;
 
     .home-button {
-        position: absolute;
-        left: 4px;
-        border: none;
-        background-color: transparent;
-        border-radius: 9999px;
-
-        &:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-        }
-
         span {
             font-size: 2.3rem;
             color: white;
@@ -125,6 +139,58 @@ nav {
     }
 }
 
+.settings-underlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background-color: black;
+    opacity: 0.6;
+    z-index: 99;
+}
+
+.settings-container {
+    position: fixed;
+    background-color: #23272A;
+    z-index: 100;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    border-radius: 16px;
+    padding: 8px;
+
+    width: 50%;
+    max-height: 80%;
+
+    .header {
+        display: flex;
+        align-items: center;
+
+        p {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .close-button {
+            span {
+                font-size: 1.5rem;
+            }
+        }
+
+        .placeholder {
+            width: 37px;
+        }
+    }
+
+
+}
+
 .anime-container {
     padding: 4px;
     display: flex;
@@ -140,6 +206,22 @@ nav {
     .anime-loader {
         height: 1px;
         width: 100%;
+    }
+}
+
+button {
+    border: none;
+    background-color: transparent;
+    border-radius: 9999px;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+    }
+
+    span {
+        font-size: 2.3rem;
+        color: white;
     }
 }
 </style>

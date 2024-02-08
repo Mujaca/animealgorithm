@@ -46,7 +46,7 @@ onMounted(() => {
 })**/
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .index-container {
     height: 98vh;
     display: grid;
