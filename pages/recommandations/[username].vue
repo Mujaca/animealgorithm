@@ -9,9 +9,11 @@
         <div class="settings-underlay" v-if="showSettings" @click="showSettings = false"></div>
         <div class="settings-container" v-if="showSettings">
             <div class="header">
-                <button class="close-button" @click="showSettings = false"><span class="material-icons"> close</span></button>
+                <button class="close-button" @click="showSettings = false"><span class="material-icons">
+                        close</span></button>
                 <p> Einstellungen </p>
-                <button class="close-button" @click="showSettings = false"><span class="material-icons"> refresh </span></button>
+                <button class="close-button" @click="showSettings = false"><span class="material-icons"> refresh
+                    </span></button>
             </div>
 
             <div class="settings-area">
@@ -44,10 +46,15 @@ const username = route.params.username
 const page = ref(0)
 const fetchedAnimes: Ref<any[]> = ref([]);
 
-const selectedGenres:Ref<string[]> = ref([]);
+const selectedGenres: Ref<string[]> = ref([]);
+const disabledGenres: Ref<string[]> = ref([]);
 
-const { data: animes, refresh } = await useFetch(() => `/api/recommendation?user=${username}&limit=20&page=${page.value}${selectedGenres.value.length > 0 ? '&include_genres=' + selectedGenres.value.join(';') : ''}`);
-const { data:genres } = await useFetch<string[]>('/api/genres');
+const { data: animes, refresh } = await useFetch(() => `/api/recommendation?user=${username}&limit=20
+&page=${page.value}
+${selectedGenres.value.length > 0 ? '&include_genres=' + selectedGenres.value.join(';') : ''}
+${disabledGenres.value.length > 0 ? '&excluded_genres=' + disabledGenres.value.join(';') : ''}
+`);
+const { data: genres } = await useFetch<string[]>('/api/genres');
 refreshNuxtData();
 fetchedAnimes.value.push(animes.value)
 
@@ -86,28 +93,55 @@ function onScroll(event: Event) {
     }
 }
 
-async function genreChipClick(event:MouseEvent, genre:string) {
-    const isInArray = selectedGenres.value.includes(genre);
+async function genreChipClick(event: MouseEvent, genre: string) {
     const target = event.target as HTMLDivElement
+    const doubleClicked = event.detail == 2;
+    const isDisabled = disabledGenres.value.includes(genre);
+    const isEnabled = selectedGenres.value.includes(genre);
 
-    if(!isInArray) {
-        selectedGenres.value.push(genre);
-        target.classList.add('active');
-    }else {
-        selectedGenres.value.splice(selectedGenres.value.indexOf(genre), 1);
-        target.classList.remove('active')
+    if (doubleClicked) {
+        if (!isDisabled) {
+            selectedGenres.value.splice(selectedGenres.value.indexOf(genre), 1);
+            disabledGenres.value.push(genre);
+            target.classList.add('disabled')
+            target.classList.remove('active')
+            return refreshAnimes();
+        }
     }
 
-    fetchedAnimes.value = [];
-    page.value = 0;
-    nextTick(async () => {
-        await refresh();
-        fetchedAnimes.value.push(animes.value)
-    })
+    if (!isEnabled && !isDisabled) {
+        selectedGenres.value.push(genre);
+        target.classList.add('active');
+        return refreshAnimes()
+    }
+
+    if(isEnabled) selectedGenres.value.splice(selectedGenres.value.indexOf(genre), 1);
+    if(isDisabled) disabledGenres.value.splice(disabledGenres.value.indexOf(genre), 1);
+    target.classList.remove('active')
+    target.classList.remove('disabled')
+    return refreshAnimes()
+}
+
+let refreshTimer:any;
+function refreshAnimes() {
+    if(refreshTimer) {
+        clearTimeout(refreshTimer);
+        refreshTimer = null;
+    }
+
+    refreshTimer = setTimeout(() => {
+        fetchedAnimes.value = [];
+        page.value = 0;
+        nextTick(async () => {
+            await refresh();
+            fetchedAnimes.value.push(animes.value)
+        })
+    }, 200);
+
 }
 
 useHead({
-    title: `${username}'s Anime recommandations'` 
+    title: `${username}'s Anime recommandations'`
 })
 
 onMounted(() => {
@@ -239,6 +273,11 @@ nav {
 
         &.active {
             border: 1px solid white;
+        }
+
+        &.disabled {
+            background-color: #004242;
+            border: 1px solid #004242;
         }
 
     }

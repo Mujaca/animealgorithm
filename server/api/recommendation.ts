@@ -25,6 +25,7 @@ export default defineEventHandler(async (event) => {
     const keyword: number = query.keywords ? query.keywords as number : 30
     const username:string = query.user as string;
     const includeGenres:string[] = (query.include_genres as string)?.split(";");
+    const excludedGenres:string[] = (query.excluded_genres as string)?.split(";");
     if (!query.user) return { staus: 400, message: "No User given" }
 
     setMinKeywordCount(keyword);
@@ -53,9 +54,15 @@ export default defineEventHandler(async (event) => {
         for(let genre of anime.genres) {
             if(includeGenres.includes(genre)) return true;
         }
-
         return false;
     })
+    if(excludedGenres) limited = limited.filter((anime) => {
+        for(let genre of anime.genres) {
+            if(excludedGenres.includes(genre)) return false;
+        }
+        return true;
+    })
+
     limited = limited.splice(limit * page, limit)
 
     return limited
