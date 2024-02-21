@@ -26,6 +26,7 @@ export default defineEventHandler(async (event) => {
     const username:string = query.user as string;
     const includeGenres:string[] = (query.include_genres as string)?.split(";");
     const excludedGenres:string[] = (query.excluded_genres as string)?.split(";");
+    const algorithm:string = query.algorithm as string || "new"
     if (!query.user) return { staus: 400, message: "No User given" }
 
     setMinKeywordCount(keyword);
@@ -37,7 +38,7 @@ export default defineEventHandler(async (event) => {
     }
 
     let userreoms = generated[username]
-    if (generated[username] == undefined || (query.regenerate == true || query.regenerate == 1)) userreoms = await getRecommandations(personalList[username], personalList,username)
+    if (generated[username] == undefined || (query.regenerate == true || query.regenerate == 1)) userreoms = await getRecommandations(personalList[username], personalList, algorithm, username)
 
     for (let index = 0; index < userreoms.length; index++) {
         const anime = userreoms[index];

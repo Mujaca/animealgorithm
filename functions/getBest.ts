@@ -2,7 +2,7 @@ import type { AnimeEntry, ListEntry } from "anilist-node";
 import type { counted, counter, personalList } from "~/@types/anilist";
 import { getKeyWords } from "./keywords";
 
-export function getBestShows(userlist:personalList):ListEntry[] {
+export function getBestShows(userlist:personalList,percent:number):ListEntry[] {
     let arr:ListEntry[] = [];
     
     for(let animekey of Object.keys(userlist)) {
@@ -14,13 +14,13 @@ export function getBestShows(userlist:personalList):ListEntry[] {
     });
     
     let length = arr.length - 1;
-    arr.splice((length / 100) * 35, length - ((length / 100) * 35) + 1);
+    arr.splice((length / 100) * percent, length - ((length / 100) * percent) + 1);
     return arr
 }
 
 export function getFavoriteKeyWords(userlist:personalList):counted[]{
     const keywords:counter = {}
-    let bestShows = getBestShows(userlist);
+    let bestShows = getBestShows(userlist, 100);
 
     for(let show of bestShows) {
         let words = getKeyWords(show.media.description);
@@ -47,7 +47,7 @@ export function getFavoriteKeyWords(userlist:personalList):counted[]{
 
 export function getFavoriteGenres(userlist:personalList):counted[]{
     const genres:counter = {};
-    const bestShows = getBestShows(userlist);
+    const bestShows = getBestShows(userlist, 100);
     for(let show of bestShows) {
         for(let genre of show.media.genres) {
             if(!genres[genre]) genres[genre] = 0;
@@ -69,7 +69,7 @@ export function getFavoriteGenres(userlist:personalList):counted[]{
 
 export function getFavoriteTags(userlist:personalList):counted[]{
     const tags:counter = {};
-    const bestShows = getBestShows(userlist);
+    const bestShows = getBestShows(userlist, 100);
     for(let show of bestShows) {
         for(let tag of show.media.tags) {
             if(!tags[tag.name]) tags[tag.name] = 0;

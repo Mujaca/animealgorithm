@@ -14,12 +14,12 @@ var seasons = [
     "FALL"
 ]
 
-export async function getRecommandations(userlists: personalList, allusers: allUser, username:string) {
+export async function getRecommandations(userlists: personalList, allusers: allUser, algorithm:string = "new", username:string) {
     const anilistRecomandations: number[] = [];
     let animesArr = animes.slice()
 
     for (let user of Object.keys(allusers)) {
-        const best = getBestShows(allusers[user]);
+        const best = getBestShows(allusers[user], 100);
         for (let anime of best) {
             if (!includesAnime(animes, anime.media as AnimeEntry)) animes.push(anime.media as AnimeEntry);
         }
@@ -37,8 +37,8 @@ export async function getRecommandations(userlists: personalList, allusers: allU
 
     }
 
-    const best = getBestShows(userlists);
-    const recomandations: AnimeEntry[] = await calculateService(animesArr, best);
+    const best = getBestShows(userlists, algorithm == 'new' ? 100 : 35);
+    const recomandations: AnimeEntry[] = await calculateService(animesArr, best, algorithm);
     recomandations.sort(function (a, b) {
         //@ts-ignore
         return b.recomandation - a.recomandation;
@@ -87,9 +87,10 @@ function createChunks(animes: AnimeEntry[], chunks: number) {
     return slicedChunks;
 }
 
-async function startWorker(animes: AnimeEntry[], bestAnimes: ListEntry[]): Promise<AnimeEntry[]> {
+async function startWorker(animes: AnimeEntry[], bestAnimes: ListEntry[], algorithm:string): Promise<AnimeEntry[]> {
     return new Promise((resolve) => {
-        const thread = new Worker('./worker/calculation.js', {
+        const script = algorithm == 'new' ? 'calculation.js' : 'old_calculation.js';
+        const thread = new Worker('./worker/' + script, {
             workerData: {
                 animes,
                 best: bestAnimes,
@@ -103,11 +104,11 @@ async function startWorker(animes: AnimeEntry[], bestAnimes: ListEntry[]): Promi
     })
 }
 
-async function calculateService(animes: AnimeEntry[], bestAnimes: ListEntry[]) {
+async function calculateService(animes: AnimeEntry[], bestAnimes: ListEntry[], algorithm:string) {
     const chunks = createChunks(animes, threads);
     const promisses = [];
     for (let chunk of chunks) {
-        promisses.push(startWorker(chunk, bestAnimes));
+        promisses.push(startWorker(chunk, bestAnimes, algorithm));
     }
 
     const recomandation = [];
