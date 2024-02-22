@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as config from "../../config.json";
 import type { allUser } from "~/@types/anilist";
-import { updatePersonalList } from "~/functions/anilist";
+import { getListStatus, updatePersonalList } from "~/functions/anilist";
 import { setMinKeywordCount } from "~/functions/keywords";
 import { fetchAnimes, getRecommandations } from "~/functions/getRecommandations";
 import type { AnimeEntry } from "anilist-node";
@@ -27,6 +27,9 @@ export default defineEventHandler(async (event) => {
     const includeGenres:string[] = (query.include_genres as string)?.split(";");
     const excludedGenres:string[] = (query.excluded_genres as string)?.split(";");
     const algorithm:string = query.algorithm as string || "new"
+    const showPlanned: boolean = JSON.parse(query.showPlanned as string) || false
+    const showDropped: boolean = JSON.parse(query.showDropped as string) || false
+
     if (!query.user) return { staus: 400, message: "No User given" }
 
     setMinKeywordCount(keyword);
@@ -63,6 +66,14 @@ export default defineEventHandler(async (event) => {
         }
         return true;
     })
+    if(!showDropped) limited = limited.filter((anime) => {
+        return getListStatus(username, anime.title.romaji) != "DROPPED"
+    })
+
+    if(!showPlanned) limited = limited.filter((anime) => {
+        return getListStatus(username, anime.title.romaji) != "PLANNING"
+    })
+
 
     limited = limited.splice(limit * page, limit)
 

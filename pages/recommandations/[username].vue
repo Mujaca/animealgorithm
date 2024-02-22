@@ -12,15 +12,37 @@
                 <button class="close-button" @click="showSettings = false"><span class="material-icons">
                         close</span></button>
                 <p> Einstellungen </p>
-                <button class="close-button" @click="showSettings = false"><span class="material-icons"> refresh
+                <button class="close-button" @click="regenerate"><span class="material-icons"> refresh
                     </span></button>
             </div>
 
             <div class="settings-area">
-                Coming soon ... <br>
-                maybe ... <br>
-                some day ... <br>
-                in 3-5 buisness days
+                <div class="settings-section">
+                    <select v-model="algorithm">
+                        <option selected value="new">New Algorithm (faster)</option>
+                        <option value="old">Old Algorithm (slower)</option>
+                    </select>
+                    <div class="checkboxes">
+                        <div>
+                            <input v-model="showPlanned" type="checkbox">
+                            <span>Show Planning</span>
+                        </div>
+
+                        <div>
+                            <input v-model="showDropped" type="checkbox">
+                            <span>Show Dropped</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <div>
+                        <input v-model="keyWordCount" type="number">
+                        <span>How often should a Keyword be present to be considered?</span>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <p>More coming soon™</p>
+                </div>
             </div>
         </div>
         <div class="genres-container">
@@ -46,13 +68,23 @@ const username = route.params.username
 const page = ref(0)
 const fetchedAnimes: Ref<any[]> = ref([]);
 
+const algorithm: Ref<String> = ref("new");
 const selectedGenres: Ref<string[]> = ref([]);
 const disabledGenres: Ref<string[]> = ref([]);
+const reload: Ref<boolean> = ref(false)
+const keyWordCount: Ref<number> = ref(30);
+const showPlanned:Ref<boolean> = ref(false);
+const showDropped:Ref<boolean> = ref(false);
 
 const { data: animes, refresh } = await useFetch(() => `/api/recommendation?user=${username}&limit=20
 &page=${page.value}
+&algorithm=${algorithm.value}
+&keywords=${keyWordCount.value}
+&showPlanned=${showPlanned.value}
+&showDropped=${showDropped.value}
 ${selectedGenres.value.length > 0 ? '&include_genres=' + selectedGenres.value.join(';') : ''}
 ${disabledGenres.value.length > 0 ? '&excluded_genres=' + disabledGenres.value.join(';') : ''}
+${reload.value ? '&regenerate=1' : ''}
 `);
 const { data: genres } = await useFetch<string[]>('/api/genres');
 refreshNuxtData();
@@ -115,16 +147,16 @@ async function genreChipClick(event: MouseEvent, genre: string) {
         return refreshAnimes()
     }
 
-    if(isEnabled) selectedGenres.value.splice(selectedGenres.value.indexOf(genre), 1);
-    if(isDisabled) disabledGenres.value.splice(disabledGenres.value.indexOf(genre), 1);
+    if (isEnabled) selectedGenres.value.splice(selectedGenres.value.indexOf(genre), 1);
+    if (isDisabled) disabledGenres.value.splice(disabledGenres.value.indexOf(genre), 1);
     target.classList.remove('active')
     target.classList.remove('disabled')
     return refreshAnimes()
 }
 
-let refreshTimer:any;
+let refreshTimer: any;
 function refreshAnimes() {
-    if(refreshTimer) {
+    if (refreshTimer) {
         clearTimeout(refreshTimer);
         refreshTimer = null;
     }
@@ -134,10 +166,17 @@ function refreshAnimes() {
         page.value = 0;
         nextTick(async () => {
             await refresh();
+            reload.value = false;
             fetchedAnimes.value.push(animes.value)
         })
     }, 200);
 
+}
+
+function regenerate() {
+    reload.value = true;
+    refreshAnimes();
+    showSettings.value = false;
 }
 
 useHead({
@@ -235,6 +274,7 @@ nav {
             margin-right: auto;
             text-align: center;
             font-weight: bold;
+            font-size: 1.3rem;
         }
 
         .close-button {
@@ -248,6 +288,82 @@ nav {
         }
     }
 
+    .settings-area {
+        .settings-section {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px;
+
+            &:not(:last-child)::after {
+                width: 95%;
+                border-bottom: 1px solid white;
+                opacity: .5;
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                content: '';
+            }
+        }
+
+        .checkboxes {
+            display: flex;
+            flex-direction: column;
+
+            span {
+                font-size: 1rem;
+            }
+        }
+
+        input[type='checkbox'] {
+            width: 1.2rem;
+            height: 1.2rem;
+            margin: 4px;
+            accent-color: #006666;
+
+            &:checked {
+                color: #004242;
+            }
+        }
+
+        input[type='number'] {
+            border: none;
+            background-color: #006666;
+            border-radius: 24px;
+            -moz-appearance: textfield;
+            padding: 6px 8px;
+            color: white;
+            margin: 4px;
+            margin-left: 0;
+
+            &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            &:focus {
+                outline: none;
+            }
+
+            &:focus-visible {
+                outline: none;
+            }
+        }
+
+        select {
+            border: none;
+            background-color: #006666;
+            color: white;
+            padding: 12px;
+            border-radius: 24px;
+            font-size: 0.9rem;
+        }
+    }
 
 }
 
