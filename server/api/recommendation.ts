@@ -27,8 +27,8 @@ export default defineEventHandler(async (event) => {
     const includeGenres:string[] = (query.include_genres as string)?.split(";");
     const excludedGenres:string[] = (query.excluded_genres as string)?.split(";");
     const algorithm:string = query.algorithm as string || "new"
-    const showPlanned: boolean = JSON.parse(query.showPlanned as string) || false
-    const showDropped: boolean = JSON.parse(query.showDropped as string) || false
+    const showPlanned: boolean = JSON.parse(query.showPlanned as string || "false")
+    const showDropped: boolean = JSON.parse(query.showDropped as string || "false")
 
     if (!query.user) return { staus: 400, message: "No User given" }
 
