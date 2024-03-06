@@ -24,9 +24,11 @@ export default defineEventHandler(async (event) => {
     const page: number = query.page ? query.page as number : 0
     const keyword: number = query.keywords ? query.keywords as number : 30
     const username:string = query.user as string;
+    const algorithm:string = query.algorithm as string || "new"
     const includeGenres:string[] = (query.include_genres as string)?.split(";");
     const excludedGenres:string[] = (query.excluded_genres as string)?.split(";");
-    const algorithm:string = query.algorithm as string || "new"
+    const includeTags:string[] = (query.include_tags as string)?.split(";");
+    const excludeTags:string[] = (query.excluded_tags as string)?.split(";");
     const showPlanned: boolean = JSON.parse(query.showPlanned as string || "false")
     const showDropped: boolean = JSON.parse(query.showDropped as string || "false")
 
@@ -63,6 +65,18 @@ export default defineEventHandler(async (event) => {
     if(excludedGenres) limited = limited.filter((anime) => {
         for(let genre of anime.genres) {
             if(excludedGenres.includes(genre)) return false;
+        }
+        return true;
+    })
+    if(includeTags) limited = limited.filter((anime) => {
+        for(let tag of anime.tags) {
+            if(includeTags.includes(tag.name)) return true;
+        }
+        return false;
+    })
+    if(excludeTags) limited = limited.filter((anime) => {
+        for(let tag of anime.tags) {
+            if(excludeTags.includes(tag.name)) return false;
         }
         return true;
     })

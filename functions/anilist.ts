@@ -62,6 +62,12 @@ export async function getGenres(){
     return await anilist.genres()
 }
 
+export async function getTags() {
+    return (await anilist.mediaTags()).map((item) => {
+        return item.name;
+    })
+}
+
 export function getListStatus(username:string, anime:string) {
     return listType.get(username)?.get(anime)
 }

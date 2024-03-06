@@ -41,7 +41,10 @@
                     </div>
                 </div>
                 <div class="settings-section">
-                    <p>More coming soon™</p>
+                    <div class="genres-container">
+                        <div class="genre-chip" v-for="tag in tags" @click="tagChipClick($event, tag)"> {{ tag }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -69,12 +72,14 @@ const page = ref(0)
 const fetchedAnimes: Ref<any[]> = ref([]);
 
 const algorithm: Ref<String> = ref("new");
+    const reload: Ref<boolean> = ref(false)
 const selectedGenres: Ref<string[]> = ref([]);
 const disabledGenres: Ref<string[]> = ref([]);
-const reload: Ref<boolean> = ref(false)
+const selectedTags: Ref<string[]> = ref([]);
+const disabledTags: Ref<string[]> = ref([]);
 const keyWordCount: Ref<number> = ref(30);
-const showPlanned:Ref<boolean> = ref(false);
-const showDropped:Ref<boolean> = ref(false);
+const showPlanned: Ref<boolean> = ref(false);
+const showDropped: Ref<boolean> = ref(false);
 
 const { data: animes, refresh } = await useFetch(() => `/api/recommendation?user=${username}&limit=20
 &page=${page.value}
@@ -84,9 +89,12 @@ const { data: animes, refresh } = await useFetch(() => `/api/recommendation?user
 &showDropped=${showDropped.value}
 ${selectedGenres.value.length > 0 ? '&include_genres=' + selectedGenres.value.join(';') : ''}
 ${disabledGenres.value.length > 0 ? '&excluded_genres=' + disabledGenres.value.join(';') : ''}
+${selectedTags.value.length > 0 ? '&include_tags=' + selectedTags.value.join(';') : ''}
+${disabledTags.value.length > 0 ? '&excluded_tags=' + disabledTags.value.join(';') : ''}
 ${reload.value ? '&regenerate=1' : ''}
 `);
 const { data: genres } = await useFetch<string[]>('/api/genres');
+const { data: tags } = await useFetch<string[]>('/api/tags');
 refreshNuxtData();
 fetchedAnimes.value.push(animes.value)
 
@@ -153,6 +161,37 @@ async function genreChipClick(event: MouseEvent, genre: string) {
     target.classList.remove('disabled')
     return refreshAnimes()
 }
+
+async function tagChipClick(event: MouseEvent, genre: string) {
+    const target = event.target as HTMLDivElement
+    const doubleClicked = event.detail == 2;
+    const isDisabled = disabledTags.value.includes(genre);
+    const isEnabled = selectedTags.value.includes(genre);
+
+    if (doubleClicked) {
+        if (!isDisabled) {
+            selectedTags.value.splice(selectedTags.value.indexOf(genre), 1);
+            disabledTags.value.push(genre);
+            target.classList.add('disabled')
+            target.classList.remove('active')
+            return refreshAnimes();
+        }
+    }
+
+    if (!isEnabled && !isDisabled) {
+        selectedTags.value.push(genre);
+        target.classList.add('active');
+        return refreshAnimes()
+    }
+
+    if (isEnabled) selectedTags.value.splice(selectedTags.value.indexOf(genre), 1);
+    if (isDisabled) disabledTags.value.splice(disabledTags.value.indexOf(genre), 1);
+    target.classList.remove('active')
+    target.classList.remove('disabled')
+    return refreshAnimes()
+}
+
+
 
 let refreshTimer: any;
 function refreshAnimes() {
@@ -264,6 +303,7 @@ nav {
 
     width: 50%;
     max-height: 80%;
+    overflow-y: auto;
 
     .header {
         display: flex;
@@ -341,7 +381,8 @@ nav {
             margin: 4px;
             margin-left: 0;
 
-            &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
+            &::-webkit-outer-spin-button,
+            &::-webkit-inner-spin-button {
                 -webkit-appearance: none;
                 margin: 0;
             }
