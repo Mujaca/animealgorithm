@@ -1,5 +1,12 @@
-// https://v3.nuxtjs.org/api/configuration/nuxt.config
+import pkg from './package.json'
+
 export default defineNuxtConfig({
+    runtimeConfig: {
+        version: pkg.version,
+        public: {
+            version: pkg.version
+        }
+    },
     app: {
         head: {
             link: [

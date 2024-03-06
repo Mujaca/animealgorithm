@@ -13,6 +13,9 @@
     <div class="spinner" v-else>
         <div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
     </div>
+    <div class="version-info">
+        Current Website Version: {{ $config.public.version  }}
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -129,6 +132,13 @@ onMounted(() => {
     }
 }
 
+.version-info {
+    position: fixed;
+    bottom: 5px;
+    right: 5px;
+    font-size: 0.9rem;
+}
+
 @media screen and (max-width:720px) {
     .index-container {
 
@@ -145,6 +155,10 @@ onMounted(() => {
                 margin-top: .1rem;
             }
         }
+    }
+
+    .version-info { 
+        display: none;
     }
 }
 
