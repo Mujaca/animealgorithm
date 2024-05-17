@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
 
     setMinKeywordCount(keyword);
 
-    if (personalList[username] == undefined) {
+    if (personalList[username] == undefined || (query.regenerate == true || query.regenerate == 1)) {
         personalList[username] = await updatePersonalList(username);
         if (!config.group.includes(username)) config.group.push(username);
         fs.writeFileSync('../config.json', JSON.stringify(config));
